@@ -27,3 +27,4 @@ db.settings({
 });
 
 console.log('🎯 Sistema L.O.T.S. Aerodesign 2026 pronto!');
+console.log('💰 Valor do número: R$ 2,00');
