@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifas L.O.T.S. Aerodesign - Sorteio 18/10</title>
+    <title>L.O.T.S. Aerodesign 2026 | Rifa Oficial</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -13,11 +13,12 @@
 </head>
 <body>
     <div id="connectionStatus" class="connection-status disconnected">
-        🔴 Conectando...
+        🔴 Conectando ao Servidor 2026...
     </div>
 
     <div id="loading" class="loading">
-        <h3>Carregando dados da rifa...</h3>
+        <div class="spinner"></div>
+        <h3>Carregando rifa L.O.T.S. 2026...</h3>
     </div>
 
     <div id="content" style="display: none;">
@@ -26,9 +27,11 @@
                 <div class="header-content">
                     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsPURFQgtEovPz14CA4q16d53_Yunj0taX0Q&s" alt="Logo L.O.T.S. Aerodesign" class="logo">
                     <div class="header-text">
-                        <h1>L.O.T.S. Aerodesign</h1>
-                        <p>Rifas Online - Sorteio em</p>
-                        <div class="countdown" id="countdown">18 de Outubro</div>
+                        <h1>🏆 L.O.T.S. Aerodesign 2026</h1>
+                        <p>Rifa Oficial - Rumo à Competição Nacional</p>
+                        <div class="countdown" id="countdown">
+                            <i class="fas fa-calendar-alt"></i> Sorteio: 26 de Junho, 2026!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,125 +47,147 @@
                 <div class="prize-card">
                     <div class="trophy">🥈</div>
                     <h3>2º Prêmio</h3>
-                    <div class="amount">R$ 150,00</div>
+                    <div class="amount">R$ 200,00</div>
                 </div>
                 <div class="prize-card">
-                    <div class="trophy">🥉</div>
-                    <h3>3º Prêmio</h3>
-                    <div class="amount">R$ 50,00</div>
+                    <div class="trophy">🎁</div>
+                    <h3>Brindes Especiais</h3>
+                    <div class="amount">Para os MAIORES Compradores!</div>
+                    <p>Brindes exclusivos!</p>
+                </div>
+            </section>
+            
+            <!-- Ranking dos Maiores Compradores -->
+            <section class="ranking-section">
+                <h2 class="section-title"><i class="fas fa-trophy"></i> Ranking dos Apoiadores TOP 2026</h2>
+                <div class="ranking-container" id="rankingContainer">
+                    <div class="ranking-loading">Carregando ranking...</div>
                 </div>
             </section>
             
             <section class="numbers-section">
-                <h2 class="section-title">Escolha seus números da sorte!</h2>
-                <p class="section-subtitle">Apenas R$ 1,00 por número! Quanto mais números você comprar, maiores suas chances de ganhar!</p>
+                <h2 class="section-title">🎲 Escolha seus números da sorte!</h2>
+                <p class="section-subtitle">Cada número contribui para o desenvolvimento do nosso protótipo aeroespacial!</p>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <i class="fas fa-tag"></i>
+                        <span id="totalNumbers">350</span>
+                        <small>Total</small>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="soldNumbers">0</span>
+                        <small>Vendidos</small>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock"></i>
+                        <span id="availableNumbers">350</span>
+                        <small>Disponíveis</small>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span id="raisedAmount">R$ 0</span>
+                        <small>Arrecadado</small>
+                    </div>
+                </div>
                 
                 <div class="progress-bar">
                     <div class="progress" id="progressBar"></div>
                 </div>
-                <div class="progress-text" id="progressText">Carregando...</div>
+                <div class="progress-text" id="progressText">🎯 0% dos números vendidos!</div>
                 
                 <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color available"></div>
-                        <span>Disponível</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color selected-legend"></div>
-                        <span>Selecionado</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color reserved-legend"></div>
-                        <span>Reservado</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color sold-legend"></div>
-                        <span>Vendido</span>
-                    </div>
+                    <div class="legend-item"><div class="legend-color available"></div><span>📌 Disponível</span></div>
+                    <div class="legend-item"><div class="legend-color selected-legend"></div><span>⭐ Selecionado</span></div>
+                    <div class="legend-item"><div class="legend-color reserved-legend"></div><span>⏳ Reservado</span></div>
+                    <div class="legend-item"><div class="legend-color sold-legend"></div><span>✅ Pago</span></div>
                 </div>
                 
-                <div class="numbers-grid" id="numbersGrid">
-                    <!-- Os números serão gerados via JavaScript -->
-                </div>
+                <div class="numbers-grid" id="numbersGrid"></div>
                 
                 <div class="selection-info">
-                    <p>Números selecionados: <span id="selectedCount">0</span></p>
-                    <p>Valor total: <span class="total">R$ <span id="totalValue">0,00</span></span></p>
-                    <button class="btn btn-secondary" id="clearSelection">Limpar Seleção</button>
+                    <div class="selection-details">
+                        <i class="fas fa-list"></i>
+                        <p>Números selecionados: <strong id="selectedCount">0</strong></p>
+                        <p>Valor unitário: <strong>R$ 1,00</strong></p>
+                        <p class="total">Total: <strong>R$ <span id="totalValue">0,00</span></strong></p>
+                    </div>
+                    <button class="btn btn-secondary" id="clearSelection">
+                        <i class="fas fa-trash-alt"></i> Limpar Seleção
+                    </button>
                 </div>
                 
                 <div class="customer-info">
-                    <h3>Seus dados</h3>
-                    <div class="form-group">
-                        <label for="customerName">Nome completo</label>
-                        <input type="text" id="customerName" placeholder="Digite seu nome completo">
-                    </div>
-                    <div class="form-group">
-                        <label for="customerPhone">Telefone</label>
-                        <input type="tel" id="customerPhone" placeholder="(00) 00000-0000">
+                    <h3><i class="fas fa-user-check"></i> Seus Dados para Reserva</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName"><i class="fas fa-user"></i> Nome Completo</label>
+                            <input type="text" id="customerName" placeholder="Digite seu nome completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone"><i class="fab fa-whatsapp"></i> WhatsApp</label>
+                            <input type="tel" id="customerPhone" placeholder="(DDD) 9 0000-0000">
+                        </div>
                     </div>
                 </div>
                 
                 <button class="btn btn-whatsapp btn-large btn-block" id="buyButton">
-                    <i class="fab fa-whatsapp"></i> Comprar Rifas Selecionadas
+                    <i class="fab fa-whatsapp"></i> Reservar via WhatsApp
                 </button>
             </section>
             
             <section class="payment-info">
-                <h2 class="section-title">Como comprar sua rifa</h2>
-                <p>É rápido e fácil garantir seus números da sorte por apenas R$ 1,00 cada!</p>
-                
+                <h2 class="section-title"><i class="fas fa-question-circle"></i> Como Participar?</h2>
                 <div class="steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <h3>Selecione</h3>
-                        <p>Escolha seus números preferidos na lista acima</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <h3>Pague</h3>
-                        <p>COMPLETE OS DADOS e realize o pagamento via PIX para o número indicado</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <h3>Confirme</h3>
-                        <p>Envie o comprovante pelo WhatsApp e aguarde o sorteio</p>
-                    </div>
+                    <div class="step"><div class="step-number">1</div><i class="fas fa-hand-pointer"></i><h3>Escolha</h3><p>Selecione seus números favoritos no painel</p></div>
+                    <div class="step"><div class="step-number">2</div><i class="fas fa-credit-card"></i><h3>Pague via PIX</h3><p>Use a chave abaixo para realizar o pagamento</p></div>
+                    <div class="step"><div class="step-number">3</div><i class="fab fa-whatsapp"></i><h3>Valide</h3><p>Envie o comprovante pelo WhatsApp</p></div>
                 </div>
                 
                 <div class="pix-info">
+                    <div class="pix-icon"><i class="fas fa-qrcode"></i></div>
                     <div class="pix-details">
-                        <p><strong>Chave PIX:</strong></p>
-                        <p class="pix-key">31 9 9658-1509</p>
-                        <p><strong>Valor a pagar:</strong> R$ <span id="pixValue">0,00</span></p>
+                        <p><strong>💳 Chave PIX (Telefone):</strong></p>
+                        <p class="pix-key">📱 (31) 9 9658-1509</p>
+                        <p><strong>💰 Valor a pagar:</strong> <span class="pix-amount" id="pixValue">R$ 0,00</span></p>
+                        <p><strong>🏦 Titular:</strong> L.O.T.S. Aerodesign</p>
                     </div>
                 </div>
-                
-                <p style="text-align: center; font-weight: bold;">Envie o comprovante para o WhatsApp após o pagamento para confirmar sua compra!</p>
             </section>
         </div>
         
         <footer>
             <div class="container">
-                <h3>L.O.T.S. Aerodesign</h3>
-                <p>Apoie nossa equipe e concorra a prêmios incríveis!</p>
-                
+                <h3>🚀 L.O.T.S. Aerodesign 2026</h3>
                 <div class="social-links">
-                    <a href="https://www.instagram.com/lotsaerodesign/?hl=en"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/lotsaerodesign" target="_blank"><i class="fab fa-instagram"></i> @lotsaerodesign</a>
+                    <a href="https://wa.me/553196581509" target="_blank"><i class="fab fa-whatsapp"></i> (31) 9 9658-1509</a>
                 </div>
-                
-                <p>Dúvidas? Entre em contato: (31) 9 9658-1509</p>
-                <p>&copy; 2023 - Todos os direitos reservados</p>
+                <p>📧 lots.aerodesign@gmail.com</p>
+                <p>© 2026 L.O.T.S. Aerodesign - Todos os direitos reservados</p>
+                <p class="admin-hint">🔧 <strong>Administrador:</strong> <button id="adminLoginBtn" class="admin-login-btn"><i class="fas fa-lock"></i> Acesso Admin</button></p>
             </div>
         </footer>
     </div>
 
-    <!-- Configuração do Firebase (em arquivo separado) -->
+    <!-- Modal de Login Admin -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Acesso Administrativo</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Digite a senha para acessar o painel de controle</p>
+                <input type="password" id="adminPassword" placeholder="Senha de administrador" class="admin-password-input">
+                <div id="loginError" class="login-error"></div>
+                <button id="loginSubmitBtn" class="btn btn-primary">Entrar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="firebase-config.js"></script>
-    
-    <!-- Lógica da aplicação (em arquivo separado) -->
     <script src="app.js"></script>
 </body>
-
 </html>
-
