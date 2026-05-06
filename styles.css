@@ -773,16 +773,6 @@ footer {
     min-height: 30px;
 }
 
-/* Console Admin Style */
-.admin-console-header {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    color: #FFD700;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin: 10px 0;
-    font-weight: bold;
-}
-
 @media (max-width: 768px) {
     .numbers-grid {
         grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
