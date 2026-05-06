@@ -1,5 +1,5 @@
 // ========== CONFIGURAÇÃO DO FIREBASE ==========
-// ATENÇÃO: Substitua estas configurações pelas suas do Firebase Console
+// ATUALIZADO PARA 2026
 
 const firebaseConfig = {
     apiKey: "AIzaSyCGmhF6xjwJ-lUSq9BylE8O3tweyz0PtiI",
@@ -13,10 +13,17 @@ const firebaseConfig = {
 // Inicializar Firebase
 try {
     firebase.initializeApp(firebaseConfig);
-    console.log('Firebase inicializado com sucesso');
+    console.log('✅ Firebase inicializado com sucesso - L.O.T.S. 2026');
 } catch (error) {
-    console.error('Erro ao inicializar Firebase:', error);
+    console.error('❌ Erro ao inicializar Firebase:', error);
 }
 
 // Exportar para uso em outros arquivos
 const db = firebase.firestore();
+
+// Configuração offline para melhor performance
+db.settings({
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+
+console.log('🎯 Sistema L.O.T.S. Aerodesign 2026 pronto!');
