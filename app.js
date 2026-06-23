@@ -4,8 +4,8 @@ let isAdminLoggedIn = false;
 
 const RIFA_CONFIG = {
     START_NUMBER: 1,
-    END_NUMBER: 350,
-    PRICE_PER_NUMBER: 2.00, // VALOR ATUALIZADO PARA R$ 2,00
+    END_NUMBER: 150, // ALTERADO: 350 → 150
+    PRICE_PER_NUMBER: 2.00,
     WHATSAPP_NUMBER: "553196581509",
     RIFA_ID: "lots-aerodesign-2026",
     SORTEIO_DATE: "20/12/2026"
@@ -36,9 +36,9 @@ const DOM = {
 
 let STATE = {
     selected: [],
-    sold: [], // array de números pagos
+    sold: [],
     reserved: [],
-    salesData: {} // { "numero": { nome, telefone, data } }
+    salesData: {}
 };
 
 // Atualiza estatísticas
@@ -53,7 +53,6 @@ function updateStats() {
 function updateRanking() {
     if (!DOM.rankingContainer) return;
     
-    // Agrupar compras por nome
     const buyerStats = {};
     for (const [numero, data] of Object.entries(STATE.salesData)) {
         const nome = data.nome;
@@ -71,7 +70,6 @@ function updateRanking() {
         buyerStats[nome].total = buyerStats[nome].quantidade * RIFA_CONFIG.PRICE_PER_NUMBER;
     }
     
-    // Ordenar por quantidade
     const ranking = Object.values(buyerStats).sort((a, b) => b.quantidade - a.quantidade);
     
     if (ranking.length === 0) {
@@ -79,7 +77,6 @@ function updateRanking() {
         return;
     }
     
-    // Renderizar ranking
     DOM.rankingContainer.innerHTML = ranking.slice(0, 10).map((buyer, index) => {
         let positionClass = '';
         let medal = '';
@@ -150,7 +147,6 @@ function render() {
         
         if (STATE.sold.includes(i)) {
             div.classList.add('sold');
-            // Adicionar tooltip com nome do comprador
             const saleInfo = STATE.salesData[i];
             if (saleInfo) {
                 const tooltip = document.createElement('span');
@@ -207,7 +203,6 @@ async function handleBuy() {
         `📅 *Sorteio:* ${RIFA_CONFIG.SORTEIO_DATE}\n\n` +
         `✨ *Anexe o comprovante do pagamento aqui!* ✨`;
     
-    // Reservar os números
     const novosReservados = [...new Set([...STATE.reserved, ...STATE.selected])];
     
     await db.collection('rifas').doc(RIFA_CONFIG.RIFA_ID).set({
