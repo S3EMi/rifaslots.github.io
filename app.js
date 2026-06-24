@@ -1,18 +1,15 @@
 // ========== CONFIGURAÇÕES DA RIFA 2026 ==========
-const ADMIN_PASSWORD = "LOTS2026Admin"; // Senha para acesso admin
+const ADMIN_PASSWORD = "LOTS2026Admin";
 let isAdminLoggedIn = false;
 
 const RIFA_CONFIG = {
     START_NUMBER: 1,
-    END_NUMBER: 150, // ALTERADO: 350 → 150
+    END_NUMBER: 150,
     PRICE_PER_NUMBER: 2.00,
     WHATSAPP_NUMBER: "553196581509",
     RIFA_ID: "lots-aerodesign-2026",
-    SORTEIO_DATE: "20/12/2026"
+    SORTEIO_DATE: "26/06/2026"
 };
-
-// Estrutura para armazenar vendas com nome do comprador
-// Formato: { numero: { nome, telefone, data } }
 
 const DOM = {
     grid: document.getElementById('numbersGrid'),
@@ -41,7 +38,6 @@ let STATE = {
     salesData: {}
 };
 
-// Atualiza estatísticas
 function updateStats() {
     if (DOM.totalNumbers) DOM.totalNumbers.textContent = RIFA_CONFIG.END_NUMBER;
     if (DOM.soldNumbers) DOM.soldNumbers.textContent = STATE.sold.length;
@@ -49,7 +45,6 @@ function updateStats() {
     if (DOM.raisedAmount) DOM.raisedAmount.textContent = `R$ ${(STATE.sold.length * RIFA_CONFIG.PRICE_PER_NUMBER).toFixed(2)}`;
 }
 
-// Atualiza o ranking dos maiores compradores
 function updateRanking() {
     if (!DOM.rankingContainer) return;
     
@@ -156,6 +151,14 @@ function render() {
             }
         } else if (STATE.reserved.includes(i)) {
             div.classList.add('reserved');
+            // Tooltip para reservados (mostra quem reservou se tiver info)
+            const saleInfo = STATE.salesData[i];
+            if (saleInfo) {
+                const tooltip = document.createElement('span');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = `⏳ ${saleInfo.nome}`;
+                div.appendChild(tooltip);
+            }
         } else {
             if (STATE.selected.includes(i)) div.classList.add('selected');
             div.onclick = () => toggle(i);
@@ -289,9 +292,10 @@ function showAdminConsole() {
     console.log("%c📋 Comandos disponíveis:", "color:#0f2b5c;font-weight:bold;font-size:12px;");
     console.log("  • ajuda() - Mostrar todos os comandos");
     console.log("  • status() - Ver resumo da rifa");
-    console.log("  • vender(n1, n2, ...) - Marcar números como pagos (com nome do comprador)");
+    console.log("  • vender(n1, n2, ...) - Marcar números como pagos (com nome)");
     console.log("  • venderComNome(numero, nome, telefone) - Vender com dados completos");
     console.log("  • venderIntervalo(inicio, fim) - Vender intervalo");
+    console.log("  • venderReservado(numero, nome, telefone) - Vender número RESERVADO diretamente");
     console.log("  • liberar(n1, n2, ...) - Liberar números");
     console.log("  • liberarTudo() - Resetar rifa (⚠️ cuidado!)");
     console.log("  • sortear() - Sortear ganhador");
@@ -299,6 +303,7 @@ function showAdminConsole() {
     console.log("  • vendidos() - Listar todos números pagos");
     console.log("  • ranking() - Ver ranking dos maiores compradores");
     console.log("  • topCompradores() - Ver top 10 compradores");
+    console.log("  • reservados() - Listar todos números reservados");
     console.log("  • sairAdmin() - Sair do modo admin");
 }
 
@@ -329,6 +334,7 @@ function setupAdminCommands() {
         });
     };
     
+    // ========== VENDER NÚMEROS (QUALQUER NÚMERO) ==========
     window.vender = async (...args) => {
         const numeros = args.filter(a => typeof a === 'number');
         if (numeros.length === 0) {
@@ -336,8 +342,26 @@ function setupAdminCommands() {
             return;
         }
         
-        const valorTotal = numeros.length * RIFA_CONFIG.PRICE_PER_NUMBER;
-        const nomeComprador = prompt(`📝 Informe o NOME do comprador para os números ${numeros.join(', ')} (Total: R$ ${valorTotal.toFixed(2)}):`);
+        // Verificar se algum número já está vendido
+        const jaVendidos = numeros.filter(n => STATE.sold.includes(n));
+        if (jaVendidos.length > 0) {
+            console.warn(`⚠️ Atenção: Os números ${jaVendidos.join(', ')} já estão vendidos!`);
+            const continuar = confirm(`Os números ${jaVendidos.join(', ')} já estão vendidos. Deseja continuar com os demais?`);
+            if (!continuar) {
+                console.log("❌ Operação cancelada");
+                return;
+            }
+        }
+        
+        // Filtrar números já vendidos
+        const numerosValidos = numeros.filter(n => !STATE.sold.includes(n));
+        if (numerosValidos.length === 0) {
+            console.log("❌ Nenhum número válido para vender (todos já estão vendidos)");
+            return;
+        }
+        
+        const valorTotal = numerosValidos.length * RIFA_CONFIG.PRICE_PER_NUMBER;
+        const nomeComprador = prompt(`📝 Informe o NOME do comprador para os números ${numerosValidos.join(', ')} (Total: R$ ${valorTotal.toFixed(2)}):`);
         if (!nomeComprador) {
             console.log("❌ Operação cancelada - nome não informado");
             return;
@@ -345,12 +369,13 @@ function setupAdminCommands() {
         
         const telefone = prompt(`📱 Informe o TELEFONE do comprador (opcional):`);
         
-        const novosSold = [...new Set([...STATE.sold, ...numeros])];
-        const novosReserved = STATE.reserved.filter(n => !numeros.includes(n));
+        // Remover da lista de reservados se estiver lá
+        const novosReserved = STATE.reserved.filter(n => !numerosValidos.includes(n));
+        const novosSold = [...new Set([...STATE.sold, ...numerosValidos])];
         
         const novasSales = {...STATE.salesData};
         const dataAtual = new Date().toLocaleString('pt-BR');
-        for (const num of numeros) {
+        for (const num of numerosValidos) {
             novasSales[num] = {
                 nome: nomeComprador,
                 telefone: telefone || 'Não informado',
@@ -364,25 +389,106 @@ function setupAdminCommands() {
             reservedNumbers: novosReserved,
             salesData: novasSales
         });
-        console.log(`✅ ${numeros.length} número(s) marcado(s) como PAGO para ${nomeComprador}!`);
+        
+        const reservadosRemovidos = numeros.filter(n => STATE.reserved.includes(n));
+        console.log(`✅ ${numerosValidos.length} número(s) marcado(s) como PAGO para ${nomeComprador}!`);
+        if (reservadosRemovidos.length > 0) {
+            console.log(`🔄 ${reservadosRemovidos.length} número(s) removido(s) da lista de reservados: ${reservadosRemovidos.join(', ')}`);
+        }
         console.log(`💰 Valor total: R$ ${valorTotal.toFixed(2)}`);
         console.log(`📈 Agora temos ${novosSold.length} números pagos`);
     };
     
+    // ========== VENDER NÚMERO RESERVADO (NOVO) ==========
+    window.venderReservado = async (numero, nome, telefone = '') => {
+        if (!numero) {
+            console.error("❌ Use: venderReservado(42, 'João Silva', '(31) 99999-9999')");
+            console.log("   Ou: venderReservado(42) - vai pedir o nome depois");
+            return;
+        }
+        
+        // Verificar se o número está reservado
+        if (!STATE.reserved.includes(numero)) {
+            console.error(`❌ O número ${numero} NÃO está reservado!`);
+            console.log("   Use 'buscar(numero)' para verificar o status.");
+            return;
+        }
+        
+        // Verificar se já está vendido
+        if (STATE.sold.includes(numero)) {
+            console.error(`❌ O número ${numero} já está VENDIDO!`);
+            return;
+        }
+        
+        // Se não passou nome, pedir
+        if (!nome) {
+            const nomePrompt = prompt(`📝 Informe o NOME do comprador para o número reservado ${numero}:`);
+            if (!nomePrompt) {
+                console.log("❌ Operação cancelada - nome não informado");
+                return;
+            }
+            nome = nomePrompt;
+            telefone = prompt(`📱 Informe o TELEFONE do comprador (opcional):`) || 'Não informado';
+        }
+        
+        const valorTotal = RIFA_CONFIG.PRICE_PER_NUMBER;
+        
+        // Remover da lista de reservados e adicionar aos vendidos
+        const novosReserved = STATE.reserved.filter(n => n !== numero);
+        const novosSold = [...new Set([...STATE.sold, numero])];
+        
+        const novasSales = {...STATE.salesData};
+        const dataAtual = new Date().toLocaleString('pt-BR');
+        novasSales[numero] = {
+            nome: nome,
+            telefone: telefone || 'Não informado',
+            data: dataAtual,
+            valor: RIFA_CONFIG.PRICE_PER_NUMBER
+        };
+        
+        await db.collection('rifas').doc(RIFA_CONFIG.RIFA_ID).update({ 
+            soldNumbers: novosSold, 
+            reservedNumbers: novosReserved,
+            salesData: novasSales
+        });
+        
+        console.log(`✅ Número ${numero} (RESERVADO) vendido para ${nome}!`);
+        console.log(`💰 Valor: R$ ${valorTotal.toFixed(2)}`);
+        console.log(`📈 Agora temos ${novosSold.length} números pagos`);
+    };
+    
+    // ========== VENDER COM NOME COMPLETO ==========
     window.venderComNome = async (numero, nome, telefone = '') => {
         if (!numero || !nome) {
             console.error("❌ Use: venderComNome(42, 'João Silva', '(31) 99999-9999')");
             return;
         }
         const numeros = Array.isArray(numero) ? numero : [numero];
-        const valorTotal = numeros.length * RIFA_CONFIG.PRICE_PER_NUMBER;
         
-        const novosSold = [...new Set([...STATE.sold, ...numeros])];
-        const novosReserved = STATE.reserved.filter(n => !numeros.includes(n));
+        // Verificar números já vendidos
+        const jaVendidos = numeros.filter(n => STATE.sold.includes(n));
+        if (jaVendidos.length > 0) {
+            console.warn(`⚠️ Os números ${jaVendidos.join(', ')} já estão vendidos!`);
+            const continuar = confirm(`Deseja continuar com os demais números?`);
+            if (!continuar) {
+                console.log("❌ Operação cancelada");
+                return;
+            }
+        }
+        
+        const numerosValidos = numeros.filter(n => !STATE.sold.includes(n));
+        if (numerosValidos.length === 0) {
+            console.log("❌ Nenhum número válido para vender");
+            return;
+        }
+        
+        const valorTotal = numerosValidos.length * RIFA_CONFIG.PRICE_PER_NUMBER;
+        const novosReserved = STATE.reserved.filter(n => !numerosValidos.includes(n));
+        const novosSold = [...new Set([...STATE.sold, ...numerosValidos])];
         
         const novasSales = {...STATE.salesData};
         const dataAtual = new Date().toLocaleString('pt-BR');
-        for (const num of numeros) {
+        for (const num of numerosValidos) {
             novasSales[num] = {
                 nome: nome,
                 telefone: telefone || 'Não informado',
@@ -396,28 +502,46 @@ function setupAdminCommands() {
             reservedNumbers: novosReserved,
             salesData: novasSales
         });
-        console.log(`✅ Número ${numeros.join(', ')} vendido para ${nome}!`);
+        console.log(`✅ Número ${numerosValidos.join(', ')} vendido para ${nome}!`);
         console.log(`💰 Valor: R$ ${valorTotal.toFixed(2)}`);
     };
     
+    // ========== VENDER INTERVALO ==========
     window.venderIntervalo = async (inicio, fim) => {
         let lista = [];
         for(let i = inicio; i <= fim; i++) lista.push(i);
-        const valorTotal = lista.length * RIFA_CONFIG.PRICE_PER_NUMBER;
         
-        const nomeComprador = prompt(`📝 Informe o NOME do comprador para o intervalo ${inicio} até ${fim} (Total: R$ ${valorTotal.toFixed(2)}):`);
+        // Verificar números já vendidos
+        const jaVendidos = lista.filter(n => STATE.sold.includes(n));
+        if (jaVendidos.length > 0) {
+            console.warn(`⚠️ Os números ${jaVendidos.join(', ')} já estão vendidos!`);
+            const continuar = confirm(`Deseja continuar com os demais números do intervalo?`);
+            if (!continuar) {
+                console.log("❌ Operação cancelada");
+                return;
+            }
+        }
+        
+        const numerosValidos = lista.filter(n => !STATE.sold.includes(n));
+        if (numerosValidos.length === 0) {
+            console.log("❌ Nenhum número válido no intervalo");
+            return;
+        }
+        
+        const valorTotal = numerosValidos.length * RIFA_CONFIG.PRICE_PER_NUMBER;
+        const nomeComprador = prompt(`📝 Informe o NOME do comprador para o intervalo ${inicio} até ${fim} (${numerosValidos.length} números, Total: R$ ${valorTotal.toFixed(2)}):`);
         if (!nomeComprador) {
             console.log("❌ Operação cancelada");
             return;
         }
         const telefone = prompt(`📱 Informe o TELEFONE (opcional):`);
         
-        const novosSold = [...new Set([...STATE.sold, ...lista])];
-        const novosReserved = STATE.reserved.filter(n => !lista.includes(n));
+        const novosReserved = STATE.reserved.filter(n => !numerosValidos.includes(n));
+        const novosSold = [...new Set([...STATE.sold, ...numerosValidos])];
         
         const novasSales = {...STATE.salesData};
         const dataAtual = new Date().toLocaleString('pt-BR');
-        for (const num of lista) {
+        for (const num of numerosValidos) {
             novasSales[num] = {
                 nome: nomeComprador,
                 telefone: telefone || 'Não informado',
@@ -435,8 +559,33 @@ function setupAdminCommands() {
         console.log(`💰 Valor total: R$ ${valorTotal.toFixed(2)}`);
     };
     
+    // ========== LISTAR RESERVADOS (NOVO) ==========
+    window.reservados = () => {
+        if (STATE.reserved.length === 0) {
+            console.log("📭 Nenhum número reservado no momento.");
+            return;
+        }
+        const sorted = [...STATE.reserved].sort((a,b) => a-b);
+        console.log(`⏳ Números reservados (${sorted.length}):`);
+        for (const num of sorted) {
+            const info = STATE.salesData[num];
+            if (info) {
+                console.log(`   ${num} - ${info.nome} (${info.data})`);
+            } else {
+                console.log(`   ${num}`);
+            }
+        }
+        console.log(`\n💡 Use 'venderReservado(numero, "Nome")' para vender um número reservado.`);
+    };
+    
+    // ========== LIBERAR NÚMEROS ==========
     window.liberar = async (...nums) => {
         const lista = Array.isArray(nums[0]) ? nums[0] : nums;
+        
+        if (lista.length === 0) {
+            console.error("❌ Use: liberar(7, 23, 42)");
+            return;
+        }
         
         const valorTotal = lista.length * RIFA_CONFIG.PRICE_PER_NUMBER;
         const confirmar = confirm(`⚠️ Tem certeza que deseja LIBERAR os números ${lista.join(', ')}? (Valor que seria estornado: R$ ${valorTotal.toFixed(2)})`);
@@ -458,6 +607,7 @@ function setupAdminCommands() {
         console.log(`🔄 ${lista.length} número(s) liberado(s) e disponíveis novamente!`);
     };
     
+    // ========== LIBERAR TUDO ==========
     window.liberarTudo = async () => {
         const senhaConfirmacao = prompt("⚠️ ATENÇÃO! Digite a senha de administrador para resetar a rifa completamente:");
         if (senhaConfirmacao === ADMIN_PASSWORD) {
@@ -473,6 +623,7 @@ function setupAdminCommands() {
         }
     };
     
+    // ========== SORTEAR ==========
     window.sortear = () => {
         if(STATE.sold.length === 0) {
             console.error("❌ Nenhum número pago ainda! Não é possível sortear.");
@@ -493,6 +644,7 @@ function setupAdminCommands() {
         console.log(`📅 Data do sorteio oficial: ${RIFA_CONFIG.SORTEIO_DATE}`);
     };
     
+    // ========== VENDIDOS ==========
     window.vendidos = () => {
         if(STATE.sold.length === 0) {
             console.log("📭 Nenhum número vendido ainda.");
@@ -510,6 +662,7 @@ function setupAdminCommands() {
         }
     };
     
+    // ========== BUSCAR ==========
     window.buscar = (numero) => {
         if(STATE.sold.includes(numero)) {
             const info = STATE.salesData[numero];
@@ -520,12 +673,20 @@ function setupAdminCommands() {
                 console.log(`   📅 Data: ${info.data}`);
             }
         } else if(STATE.reserved.includes(numero)) {
+            const info = STATE.salesData[numero];
             console.log(`⏳ Número ${numero}: RESERVADO (aguardando pagamento)`);
+            if (info) {
+                console.log(`   👤 Reservado por: ${info.nome}`);
+                console.log(`   📱 Telefone: ${info.telefone}`);
+                console.log(`   📅 Data: ${info.data}`);
+            }
+            console.log(`   💡 Use 'venderReservado(${numero}, "Nome")' para vender este número.`);
         } else {
             console.log(`🟢 Número ${numero}: DISPONÍVEL para compra (R$ ${RIFA_CONFIG.PRICE_PER_NUMBER.toFixed(2)})`);
         }
     };
     
+    // ========== RANKING ==========
     window.ranking = () => {
         const buyerStats = {};
         for (const [numero, data] of Object.entries(STATE.salesData)) {
