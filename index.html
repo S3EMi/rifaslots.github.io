@@ -1,193 +1,40 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L.O.T.S. Aerodesign 2026 | Rifa Oficial</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-</head>
-<body>
-    <div id="connectionStatus" class="connection-status disconnected">
-        🔴 Conectando ao Servidor 2026...
-    </div>
+<!-- Inside <header> -->
+<div class="countdown" id="countdown">
+    <i class="fas fa-calendar-alt"></i> Sorteio: 26 de Outubro, 2026!
+</div>
 
-    <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <h3>Carregando rifa L.O.T.S. 2026...</h3>
-    </div>
+<!-- Inside <section class="prizes"> -->
+<div class="prize-card">
+    <div class="trophy">🥇</div>
+    <h3>1º Prêmio</h3>
+    <div class="amount">R$ 250,00</div>
+</div>
+<div class="prize-card">
+    <div class="trophy">🥈</div>
+    <h3>2º Prêmio</h3>
+    <div class="amount">R$ 150,00</div>
+</div>
 
-    <div id="content" style="display: none;">
-        <header>
-            <div class="container">
-                <div class="header-content">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsPURFQgtEovPz14CA4q16d53_Yunj0taX0Q&s" alt="Logo L.O.T.S. Aerodesign" class="logo">
-                    <div class="header-text">
-                        <h1>🏆 L.O.T.S. Aerodesign 2026</h1>
-                        <p>Rifa Oficial - Rumo à Competição Nacional</p>
-                        <div class="countdown" id="countdown">
-                            <i class="fas fa-calendar-alt"></i> Sorteio: 26 de Junho, 2026!
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
-        <div class="container">
-            <section class="prizes">
-                <div class="prize-card">
-                    <div class="trophy">🥇</div>
-                    <h3>1º Prêmio</h3>
-                    <div class="amount">R$ 300,00</div>
-                </div>
-                <div class="prize-card">
-                    <div class="trophy">🥈</div>
-                    <h3>2º Prêmio</h3>
-                    <div class="amount">R$ 200,00</div>
-                </div>
-                <div class="prize-card">
-                    <div class="trophy">🎁</div>
-                    <h3>Brindes Especiais</h3>
-                    <div class="amount">Para os MAIORES Compradores!</div>
-                    <p>Brindes exclusivos e temáticos da competição!</p>
-                </div>
-            </section>
-            
-            <!-- Ranking dos Maiores Compradores -->
-            <section class="ranking-section">
-                <h2 class="section-title"><i class="fas fa-trophy"></i> Ranking dos Apoiadores TOP 2026</h2>
-                <div class="ranking-container" id="rankingContainer">
-                    <div class="ranking-loading">Carregando ranking...</div>
-                </div>
-            </section>
-            
-            <section class="numbers-section">
-                <h2 class="section-title">🎲 Escolha seus números da sorte!</h2>
-                <p class="section-subtitle">Cada número contribui para o desenvolvimento do nosso protótipo aeroespacial!</p>
-                
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <i class="fas fa-tag"></i>
-                        <span id="totalNumbers">150</span>
-                        <small>Total</small>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-check-circle"></i>
-                        <span id="soldNumbers">0</span>
-                        <small>Vendidos</small>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-clock"></i>
-                        <span id="availableNumbers">150</span>
-                        <small>Disponíveis</small>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-dollar-sign"></i>
-                        <span id="raisedAmount">R$ 0</span>
-                        <small>Arrecadado</small>
-                    </div>
-                </div>
-                
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar"></div>
-                </div>
-                <div class="progress-text" id="progressText">🎯 0% dos números vendidos!</div>
-                
-                <div class="legend">
-                    <div class="legend-item"><div class="legend-color available"></div><span>📌 Disponível</span></div>
-                    <div class="legend-item"><div class="legend-color selected-legend"></div><span>⭐ Selecionado</span></div>
-                    <div class="legend-item"><div class="legend-color reserved-legend"></div><span>⏳ Reservado</span></div>
-                    <div class="legend-item"><div class="legend-color sold-legend"></div><span>✅ Pago</span></div>
-                </div>
-                
-                <div class="numbers-grid" id="numbersGrid"></div>
-                
-                <div class="selection-info">
-                    <div class="selection-details">
-                        <i class="fas fa-list"></i>
-                        <p>Números selecionados: <strong id="selectedCount">0</strong></p>
-                        <p>Valor unitário: <strong>R$ 2,00</strong></p>
-                        <p class="total">Total: <strong>R$ <span id="totalValue">0,00</span></strong></p>
-                    </div>
-                    <button class="btn btn-secondary" id="clearSelection">
-                        <i class="fas fa-trash-alt"></i> Limpar Seleção
-                    </button>
-                </div>
-                
-                <div class="customer-info">
-                    <h3><i class="fas fa-user-check"></i> Seus Dados para Reserva</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="customerName"><i class="fas fa-user"></i> Nome Completo</label>
-                            <input type="text" id="customerName" placeholder="Digite seu nome completo">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerPhone"><i class="fab fa-whatsapp"></i> WhatsApp</label>
-                            <input type="tel" id="customerPhone" placeholder="(DDD) 9 0000-0000">
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="btn btn-whatsapp btn-large btn-block" id="buyButton">
-                    <i class="fab fa-whatsapp"></i> Reservar via WhatsApp
-                </button>
-            </section>
-            
-            <section class="payment-info">
-                <h2 class="section-title"><i class="fas fa-question-circle"></i> Como Participar?</h2>
-                <div class="steps">
-                    <div class="step"><div class="step-number">1</div><i class="fas fa-hand-pointer"></i><h3>Escolha</h3><p>Selecione seus números favoritos no painel</p></div>
-                    <div class="step"><div class="step-number">2</div><i class="fas fa-credit-card"></i><h3>Pague via PIX</h3><p>Use a chave abaixo para realizar o pagamento</p></div>
-                    <div class="step"><div class="step-number">3</div><i class="fab fa-whatsapp"></i><h3>Valide</h3><p>Envie o comprovante pelo WhatsApp</p></div>
-                </div>
-                
-                <div class="pix-info">
-                    <div class="pix-icon"><i class="fas fa-qrcode"></i></div>
-                    <div class="pix-details">
-                        <p><strong>💳 Chave PIX (Telefone):</strong></p>
-                        <p class="pix-key">📱 (31) 9 9658-1509</p>
-                        <p><strong>💰 Valor a pagar:</strong> <span class="pix-amount" id="pixValue">R$ 0,00</span></p>
-                        <p><strong>🏦 Titular:</strong> L.O.T.S. Aerodesign</p>
-                    </div>
-                </div>
-            </section>
-        </div>
-        
-        <footer>
-            <div class="container">
-                <h3>🚀 L.O.T.S. Aerodesign 2026</h3>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/lotsaerodesign" target="_blank"><i class="fab fa-instagram"></i> @lotsaerodesign</a>
-                    <a href="https://wa.me/553196581509" target="_blank"><i class="fab fa-whatsapp"></i> (31) 9 9658-1509</a>
-                </div>
-                <p>📧 lots.aerodesign@gmail.com</p>
-                <p>© 2026 L.O.T.S. Aerodesign - Todos os direitos reservados</p>
-                <p class="admin-hint">🔧 <strong>Administrador:</strong> <button id="adminLoginBtn" class="admin-login-btn"><i class="fas fa-lock"></i> Acesso Admin</button></p>
-            </div>
-        </footer>
-    </div>
+<!-- Inside <div class="stats-cards"> -->
+<div class="stat-card">
+    <i class="fas fa-tag"></i>
+    <span id="totalNumbers">350</span>
+    <small>Total</small>
+</div>
+<!-- ... -->
+<div class="stat-card">
+    <i class="fas fa-clock"></i>
+    <span id="availableNumbers">350</span>
+    <small>Disponíveis</small>
+</div>
 
-    <!-- Modal de Login Admin -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-shield-alt"></i> Acesso Administrativo</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>Digite a senha para acessar o painel de controle</p>
-                <input type="password" id="adminPassword" placeholder="Senha de administrador" class="admin-password-input">
-                <div id="loginError" class="login-error"></div>
-                <button id="loginSubmitBtn" class="btn btn-primary">Entrar</button>
-            </div>
-        </div>
-    </div>
+<!-- Inside <div class="selection-details"> -->
+<p>Valor unitário: <strong>R$ 1,00</strong></p>
 
-    <script src="firebase-config.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+<!-- Inside <div class="pix-info"> -->
+<div class="pix-details">
+    <p><strong>💳 Chave PIX (Telefone):</strong></p>
+    <p class="pix-key">📱 (31) 9 9658-1509</p>
+    <p><strong>💰 Valor a pagar:</strong> <span class="pix-amount" id="pixValue">R$ 0,00</span></p>
+    <p><strong>🏦 Titular:</strong> L.O.T.S. Aerodesign</p>
+</div>
